@@ -3,7 +3,6 @@ name: build deb
 on: 
   push:
   pull_request:
-  commit:
 
 jobs:
   build:
