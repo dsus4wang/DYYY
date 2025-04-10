@@ -588,9 +588,10 @@ static void showUserAgreementAlert() {
                     @{@"identifier": @"DYYYisSkipHotSpot", @"title": @"推荐过滤热点", @"detail": @"", @"cellType": @6, @"imageName": @"ic_squaretriangletwo_outlined_20"},
                     @{@"identifier": @"DYYYfilterLowLikes", @"title": @"推荐过滤低赞", @"detail": @"0", @"cellType": @26, @"imageName": @"ic_thumbsdown_outlined_20"},
                     @{@"identifier": @"DYYYfilterKeywords", @"title": @"推荐过滤文案", @"detail": @"", @"cellType": @26, @"imageName": @"ic_tag_outlined_20"},
+                    @{@"identifier": @"DYYYfiltertimelimit", @"title": @"推荐视频时限", @"detail": @"", @"cellType": @26, @"imageName": @"ic_playertime_outlined_20"},
                     @{@"identifier": @"DYYYNoAds", @"title": @"启用屏蔽广告", @"detail": @"", @"cellType": @6, @"imageName": @"ic_ad_outlined_20"},
                     @{@"identifier": @"DYYYNoUpdates", @"title": @"屏蔽检测更新", @"detail": @"", @"cellType": @6, @"imageName": @"ic_circletop_outlined"},
-                    @{@"identifier": @"DYYYHideteenmode", @"title": @"屏蔽青少年模式弹窗", @"detail": @"", @"cellType": @6, @"imageName": @"ic_personcircleclean_outlined_20"}
+                    @{@"identifier": @"DYYYHideteenmode", @"title": @"去青少年弹窗", @"detail": @"", @"cellType": @6, @"imageName": @"ic_personcircleclean_outlined_20"}
                 ];
                 
                 for (NSDictionary *dict in filterSettings) {
@@ -658,6 +659,31 @@ static void showUserAgreementAlert() {
                                 }
                             }, nil);
                         };
+                    } else if ([item.identifier isEqualToString:@"DYYYfiltertimelimit"]) {
+                        NSString *savedValue = [[NSUserDefaults standardUserDefaults] objectForKey:@"DYYYfiltertimelimit"];
+                        item.detail = savedValue ?: @"";
+                        item.cellTappedBlock = ^{
+                            showTextInputAlert(@"过滤视频的发布时间", item.detail, @"单位为天", ^(NSString *text) {
+                                NSString *trimmedText = [text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+                                setUserDefaults(trimmedText, @"DYYYfiltertimelimit");
+                                item.detail = trimmedText ?: @"";
+                                UIViewController *topVC = topView();
+                                if ([topVC isKindOfClass:%c(AWESettingBaseViewController)]) {
+                                    dispatch_async(dispatch_get_main_queue(), ^{
+                                        UITableView *tableView = nil;
+                                        for (UIView *subview in topVC.view.subviews) {
+                                            if ([subview isKindOfClass:[UITableView class]]) {
+                                                tableView = (UITableView *)subview;
+                                                break;
+                                            }
+                                        }
+                                        if (tableView) {
+                                            [tableView reloadData];
+                                        }
+                                    });
+                                }
+                            }, nil);
+                        };
                     }
                     [filterItems addObject:item];
                 }
@@ -706,6 +732,7 @@ static void showUserAgreementAlert() {
                 NSArray *transparencySettings = @[
                     @{@"identifier": @"DYYYtopbartransparent", @"title": @"设置顶栏透明", @"detail": @"0-1小数", @"cellType": @26, @"imageName": @"ic_module_outlined_20"},
                     @{@"identifier": @"DYYYGlobalTransparency", @"title": @"设置全局透明", @"detail": @"0-1小数", @"cellType": @26, @"imageName": @"ic_eye_outlined_20"},
+                    @{@"identifier": @"DYYYAvatarViewTransparency", @"title": @"首页头像透明", @"detail": @"0-1小数", @"cellType": @26, @"imageName": @"ic_user_outlined_20"},
                     @{@"identifier": @"DYYYisEnableCommentBlur", @"title": @"评论区毛玻璃", @"detail": @"", @"cellType": @6, @"imageName": @"ic_comment_outlined_20"}, 
                     @{@"identifier": @"DYYYCommentBlurTransparent", @"title": @"毛玻璃透明度", @"detail": @"0-1小数", @"cellType": @26, @"imageName": @"ic_eye_outlined_20"}      
                 ];
@@ -722,7 +749,7 @@ static void showUserAgreementAlert() {
                     @{@"identifier": @"DYYYNicknameScale", @"title": @"昵称文案缩放", @"detail": @"不填默认", @"cellType": @26, @"imageName": @"ic_zoomin_outlined_20"},
                     @{@"identifier": @"DYYYNicknameVerticalOffset", @"title": @"昵称下移距离", @"detail": @"不填默认", @"cellType": @26, @"imageName": @"ic_pensketch_outlined_20"},
                     @{@"identifier": @"DYYYDescriptionVerticalOffset", @"title": @"文案下移距离", @"detail": @"不填默认", @"cellType": @26, @"imageName": @"ic_pensketch_outlined_20"},
-                    @{@"identifier": @"DYYYIPLeftShiftOffset", @"title": @"属地左移距离", @"detail": @"", @"cellType": @26, @"imageName": @"ic_pensketch_outlined_20"},
+                    @{@"identifier": @"DYYYIPLabelVerticalOffset", @"title": @"属地上移距离", @"detail": @"默认为 3", @"cellType": @26, @"imageName": @"ic_pensketch_outlined_20"},
                 ];
                 
                 for (NSDictionary *dict in scaleSettings) {
@@ -750,10 +777,10 @@ static void showUserAgreementAlert() {
                 // 添加图标自定义项
                 [iconItems addObject:createIconCustomizationItem(@"DYYYIconLikeBefore", @"未点赞图标", @"ic_heart_outlined_20", @"like_before.png")];
                 [iconItems addObject:createIconCustomizationItem(@"DYYYIconLikeAfter", @"已点赞图标", @"ic_heart_filled_20", @"like_after.png")];
-                [iconItems addObject:createIconCustomizationItem(@"DYYYIconComment", @"评论图标", @"ic_comment_outlined_20", @"comment.png")];
+                [iconItems addObject:createIconCustomizationItem(@"DYYYIconComment", @"评论的图标", @"ic_comment_outlined_20", @"comment.png")];
                 [iconItems addObject:createIconCustomizationItem(@"DYYYIconUnfavorite", @"未收藏图标", @"ic_star_outlined_20", @"unfavorite.png")];
                 [iconItems addObject:createIconCustomizationItem(@"DYYYIconFavorite", @"已收藏图标", @"ic_star_filled_20", @"favorite.png")];
-                [iconItems addObject:createIconCustomizationItem(@"DYYYIconShare", @"分享图标", @"ic_share_outlined", @"share.png")];
+                [iconItems addObject:createIconCustomizationItem(@"DYYYIconShare", @"分享的图标", @"ic_share_outlined", @"share.png")];
                                 
                 // 将图标自定义section添加到sections数组
                 NSMutableArray *sections = [NSMutableArray array];
@@ -878,9 +905,13 @@ static void showUserAgreementAlert() {
                     @{@"identifier": @"DYYYHideItemTag", @"title": @"隐藏笔记标签", @"detail": @"", @"cellType": @6, @"imageName": @"ic_eyeslash_outlined_16"},
                     @{@"identifier": @"DYYYHideTemplateGroup", @"title": @"隐藏底部话题", @"detail": @"", @"cellType": @6, @"imageName": @"ic_eyeslash_outlined_16"},
                     @{@"identifier": @"DYYYHideCameraLocation", @"title": @"隐藏相机定位", @"detail": @"", @"cellType": @6, @"imageName": @"ic_eyeslash_outlined_16"},
+                    @{@"identifier": @"DYYYHideCommentViews", @"title": @"隐藏评论视图", @"detail": @"", @"cellType": @6, @"imageName": @"ic_eyeslash_outlined_16"},
                     @{@"identifier": @"DYYYHideLiveCapsuleView", @"title": @"隐藏直播胶囊", @"detail": @"", @"cellType": @6, @"imageName": @"ic_eyeslash_outlined_16"},
                     @{@"identifier": @"DYYYHideStoryProgressSlide", @"title": @"隐藏视频滑条", @"detail": @"", @"cellType": @6, @"imageName": @"ic_eyeslash_outlined_16"},
-                    @{@"identifier": @"DYYYHidePrivateMessages", @"title": @"隐藏分享私信", @"detail": @"", @"cellType": @6, @"imageName": @"ic_eyeslash_outlined_16"}
+                    @{@"identifier": @"DYYYHideDotsIndicator", @"title": @"隐藏图片滑条", @"detail": @"", @"cellType": @6, @"imageName": @"ic_eyeslash_outlined_16"},
+                    @{@"identifier": @"DYYYHidePrivateMessages", @"title": @"隐藏分享私信", @"detail": @"", @"cellType": @6, @"imageName": @"ic_eyeslash_outlined_16"},
+                    @{@"identifier": @"DYYYHideRightLable", @"title": @"隐藏昵称右侧", @"detail": @"", @"cellType": @6, @"imageName": @"ic_eyeslash_outlined_16"},
+                    @{@"identifier": @"DYYYHideChatCommentBg", @"title": @"聊天评论透明", @"detail": @"", @"cellType": @6, @"imageName": @"ic_eyeslash_outlined_16"},
                 ];
                 
                 for (NSDictionary *dict in infoSettings) {
@@ -893,7 +924,12 @@ static void showUserAgreementAlert() {
                 NSArray *livestreamSettings = @[
                     @{@"identifier": @"DYYYHideLivePlayground", @"title": @"隐藏直播广场", @"detail": @"", @"cellType": @6, @"imageName": @"ic_eyeslash_outlined_16"},
                     @{@"identifier": @"DYYYHideEnterLive", @"title": @"隐藏进入直播", @"detail": @"", @"cellType": @6, @"imageName": @"ic_eyeslash_outlined_16"},
-                    @{@"identifier": @"DYYYHideGiftPavilion", @"title": @"隐藏礼物展馆", @"detail": @"", @"cellType": @6, @"imageName": @"ic_eyeslash_outlined_16"}
+                    @{@"identifier": @"DYYYHideGiftPavilion", @"title": @"隐藏礼物展馆", @"detail": @"", @"cellType": @6, @"imageName": @"ic_eyeslash_outlined_16"},
+                    @{@"identifier": @"DYYYHideLiveRoomClear", @"title": @"隐藏退出清屏", @"detail": @"", @"cellType": @6, @"imageName": @"ic_eyeslash_outlined_16"},
+                    @{@"identifier": @"DYYYHideLiveRoomMirroring", @"title": @"隐藏投屏按钮", @"detail": @"", @"cellType": @6, @"imageName": @"ic_eyeslash_outlined_16"},
+                    @{@"identifier": @"DYYYHideLiveDiscovery", @"title": @"隐藏直播发现", @"detail": @"", @"cellType": @6, @"imageName": @"ic_eyeslash_outlined_16"},
+                    @{@"identifier": @"DYYYHideKTVSongIndicator", @"title": @"隐藏直播点歌", @"detail": @"", @"cellType": @6, @"imageName": @"ic_eyeslash_outlined_16"},
+                    @{@"identifier": @"DYYYHideCellularAlert", @"title": @"隐藏流量提醒", @"detail": @"", @"cellType": @6, @"imageName": @"ic_eyeslash_outlined_16"}
                     
                 ];
                 for (NSDictionary *dict in livestreamSettings) {
@@ -1055,6 +1091,7 @@ static void showUserAgreementAlert() {
                 // 【交互增强】分类
                 NSMutableArray<AWESettingItemModel *> *interactionItems = [NSMutableArray array];
                 NSArray *interactionSettings = @[
+                    @{@"identifier": @"DYYYisEnableModern", @"title": @"启用新版玻璃面板", @"detail": @"", @"cellType": @6, @"imageName": @"ic_gearsimplify_outlined_20"},
                     @{@"identifier": @"DYYYDisableHomeRefresh", @"title": @"禁用点击首页刷新", @"detail": @"", @"cellType": @6, @"imageName": @"ic_arrowcircle_outlined_20"},
                     @{@"identifier": @"DYYYDouble", @"title": @"禁用双击视频点赞", @"detail": @"", @"cellType": @6, @"imageName": @"ic_thumbsup_outlined_20"},
                     @{@"identifier": @"DYYYEnableDoubleOpenComment", @"title": @"启用双击打开评论", @"detail": @"", @"cellType": @6, @"imageName": @"ic_comment_outlined_20"},
@@ -1089,6 +1126,8 @@ static void showUserAgreementAlert() {
                                 @{@"identifier": @"DYYYDoubleTapCopyDesc", @"title": @"复制文案", @"detail": @"", @"cellType": @6, @"imageName": @"ic_rectangleonrectangleup_outlined_20"},
                                 @{@"identifier": @"DYYYDoubleTapComment", @"title": @"打开评论", @"detail": @"", @"cellType": @6, @"imageName": @"ic_comment_outlined_20"},
                                 @{@"identifier": @"DYYYDoubleTapLike", @"title": @"点赞视频", @"detail": @"", @"cellType": @6, @"imageName": @"ic_heart_outlined_20"},
+                                @{@"identifier": @"DYYYDoubleTapshowDislikeOnVideo", @"title": @"长按面板", @"detail": @"", @"cellType": @6, @"imageName": @"ic_xiaoxihuazhonghua_outlined_20"},                               
+                                @{@"identifier": @"DYYYDoubleTapshowSharePanel", @"title": @"分享视频", @"detail": @"", @"cellType": @6, @"imageName": @"ic_share_outlined"},
                             ];
                             
                             for (NSDictionary *dict in doubleTapFunctions) {

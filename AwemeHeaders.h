@@ -61,6 +61,7 @@ typedef NS_ENUM(NSInteger, MediaType) {
 @end
 
 @interface AWEAwemeModel : NSObject
+@property (nonatomic, strong, readwrite) NSNumber *createTime;
 @property (nonatomic, assign,readwrite) CGFloat videoDuration;
 @property (nonatomic, strong) AWEVideoModel *video;
 @property (nonatomic, strong) AWEMusicModel *music;
@@ -108,6 +109,8 @@ typedef NS_ENUM(NSInteger, MediaType) {
 @interface AWELongPressPanelManager : NSObject
 + (instancetype)shareInstance;
 - (void)dismissWithAnimation:(BOOL)animated completion:(void (^)(void))completion;
+- (BOOL)shouldShowMordenLongPressPanel;
+- (BOOL)showShareFriends;
 @end
 
 @interface AWENormalModeTabBarGeneralButton : UIButton
@@ -147,6 +150,8 @@ typedef NS_ENUM(NSInteger, MediaType) {
 @property (nonatomic, strong) UIView *view;
 - (void)performCommentAction;
 - (void)performLikeAction;
+- (void)showSharePanel;
+- (void)showDislikeOnVideo;
 - (void)onVideoPlayerViewDoubleClicked:(id)arg1;
 @end
 
@@ -176,6 +181,10 @@ typedef NS_ENUM(NSInteger, MediaType) {
 @end
 
 @interface AWEBaseElementView : UIView
+
+@end
+
+@interface AWESearchEntranceView : UIView
 
 @end
 
@@ -211,7 +220,7 @@ typedef NS_ENUM(NSInteger, MediaType) {
 @end
 
 @interface AWENormalModeTabBar : UIView
-
+@property (nonatomic, assign, readonly) UITabBarController *yy_viewController;
 @end
 
 @interface AWEPlayInteractionListenFeedView : UIView
@@ -530,7 +539,7 @@ typedef NS_ENUM(NSInteger, MediaType) {
 @interface AWELiveFeedStatusLabel : UILabel
 @end
 
-@interface WKScrollView : UIView
+@interface BDXWebView : UIView
 @end
 
 @interface IESLiveActivityBannnerView : UIView
@@ -588,6 +597,45 @@ typedef NS_ENUM(NSInteger, MediaType) {
 
 @interface AWEPlayInteractionDescriptionLabel : UILabel
 @end
-
+//关注直播
 @interface AWEConcernSkylightCapsuleView : UIView
 @end
+//直播发现
+@interface AWEFeedLiveTabRevisitControlView : UIView
+@end
+//直播 退出清屏、投屏按钮
+@interface IESLiveButton : UIView
+@end
+
+//直播点歌
+@interface IESLiveKTVSongIndicatorView : UIView
+@end
+//图片滑条
+@interface AWEStoryProgressContainerView : UIView 
+@property (nonatomic, strong, readonly) UIView *superview;
+@property (nonatomic, assign, getter=isHidden) BOOL hidden;
+- (void)layoutSubviews; 
+- (void)updateIndicatorWithPageCount:(NSInteger)count; 
+@end
+
+@interface AWESearchAnchorListModel : NSObject
+- (id)init;
+@end
+
+@interface AWEPlayInteractionAvatarView : UIView
+@property(nonatomic, readonly) NSArray *subviews;
+@property(nonatomic, readonly) CGRect frame;
+@end
+
+//直播间流量提醒弹窗
+@interface AWELiveFlowAlertView : UIView
+@end
+
+//搜索视频底部评论视图
+@interface AWECommentInputBackgroundView : UIView
+@end
+
+//聊天视频底部快速回复视图
+@interface AWEIMFeedBottomQuickEmojiInputBar : UIView
+@end
+
